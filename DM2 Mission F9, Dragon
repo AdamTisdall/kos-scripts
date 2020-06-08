@@ -1,0 +1,617 @@
+//Crew Dragon Demo 2 Mission to the ISS
+//Author: Adam Tisdall
+//Date Created: 2020-05-19
+
+runoncepath("lib/config.ks").
+configureVessel().
+
+//Launch Parameters-------------------------------------------------*****
+
+//Orbit Info
+set TargetApoapsis to 80000.
+set TargetPeriapsis to 80000.
+
+//Misc.
+set TowerHeight to 170.
+
+//First Stage
+set MECOFactor to 0.
+set S1FlightAngle to 90.
+set S1AltVar to 2500.
+set S1TurnFactor to 1000.
+set var1 to 0.
+set var2 to 0.
+set var6 to 0.
+
+//Staging
+set stagingFactor to 0.
+set var3 to 0.
+set var4 to 0.
+
+
+//Second Stage
+set inOrbit to 0.
+set phase to 1.
+set ssTurnFactor to 6.
+set S2Throttle to 1.
+
+//Orbit Operations
+set var5 to 0.
+set dragonStaged to 0.
+set dragonThrusting to 0.
+
+//Ship
+set Falcon to SHIP.
+set FirstStageMainTank to Falcon:partsdubbed("First Stage Main Tank").
+set SecondStageMainTank to Falcon:partsdubbed("Second Stage Main Tank").
+set MainTankStartingFuel to round(FirstStageMainTank[0]:resources[0]:amount).
+lock MainTankFuelPercent to ( ( (round(FirstStageMainTank[0]:resources[0]:amount)) / (MainTankStartingFuel) ) * 100).
+
+
+
+
+//Pre-Launch Operations---------------------------------------------*****
+
+clearscreen.
+print"=================================================".
+print"-------------Crew Dragon - Demo 2----------------".
+print"=================================================".
+print" ".
+
+set steeringmanager:rollts to 5.
+//print(" **Test Print, STEERINGMANAGER:ROLLTS: " + STEERINGMANAGER:ROLLTS).
+wait 1.
+
+print"Starting Pre-Launch Operations.".
+print" ".
+
+wait 0.5.
+
+print"Pre-Launch Event Log:".
+print" ".
+
+wait 1.
+
+print"- First Stage RP-1 Loading In Progress.". // first Stage rp Load
+print" ".
+toggle ag16.
+wait 2.
+
+print "- First Stage Liquid Oxygen Loading in Progress". // first Stage LOX Load
+print" ".
+toggle ag20.
+wait 2.
+
+print"- First Stage RP-1 Loading Complete".
+print" ".
+wait 1.
+
+print"- First Stage Liquid Oxygen Loading Complete".
+print" ".
+wait 1.
+
+print"- Second Stage RP-1 Loading In Progress.". // Upper Stage RP1 Load
+print" ".
+toggle ag15.
+wait 2.
+
+print"- Second Stage Liquid Oxygen Loading In Progress.". // Upper Stage LOX Load
+print" ".
+toggle ag14.
+wait 2.
+
+print"- Second Stage RP-1  Loading Complete.".
+print" ".
+wait 1.
+
+print"- Second Stage Liquid Oxygen Loading Complete.".
+print" ".
+wait 1.
+
+print"- Crew Access Arm Retracting.".
+print" ".
+toggle ag19.
+wait 5.
+
+print"- Tower Clamps Opening.".
+print" ".
+toggle ag12. // Clamps Retract
+wait 3.
+
+clearscreen.
+
+//Launch Countdown-------------------------------------------------------*****
+
+print"=================================================".
+print"------------ Crew Dragon - Demo 2 ---------------".
+print"=================================================".
+print" ".
+
+toggle sas.
+lock throttle to 0.
+
+print"Falcon Is Ready For Flight.".
+print" ".
+
+wait 1.
+
+print"Merlin Engines In Start Up.".
+print" ".
+toggle ag17. // Merlin Vent Start
+
+wait 5.
+
+print"Ignition-Sequence Start".
+print" ".
+
+wait 0.3.
+
+print"T-Minus:".
+print" ".
+
+wait 0.3.
+
+print"10".
+print" ".
+
+wait 1.
+
+print"9".
+print" ".
+
+wait 1.
+
+print "8 - Tower Partial Retraction.".
+print" ".
+
+toggle ag10. // partial tower retract
+
+wait 1.
+
+print"7".
+print" ".
+
+wait 1.
+
+print"6".
+print" ".
+
+wait 1.
+
+print"5".
+print" ".
+
+
+wait 1.
+
+print"4".
+print" ".
+
+wait 1.
+
+print"3".
+print" ".
+
+wait 1.
+
+print"2 - First Stage Engine Ignition.".
+print" ".
+toggle ag1.// First Stage Engines Ignition----------------------
+wait 0.5.
+toggle ag27.
+
+print"1 - Throttle Up.".
+
+print" ".
+set var1 to 0.1.
+
+lock throttle to var1.
+
+until var1 >0.99
+{
+	if (var1 > 0.5 and var6 =0)
+	{
+		toggle ag27.
+		set var6 to 1.
+	}
+	set var1 to var1+0.01.
+	wait 0.01.
+}
+lock throttle to 1.
+
+print"0 - Tower Full Retraction".
+print" ".
+toggle ag11. // fall back tower
+
+wait 0.1.
+
+print"- Hold Down Release.".
+print" ".
+toggle ag18.
+
+
+
+wait 0.1.
+clearscreen.
+
+
+
+// First Stage Flight------------------------------------------------------------------
+
+until MECOFactor = 1 
+{
+	print"=================================================".
+	print"------------ Crew Dragon - Demo 2 ---------------".
+	print"=================================================".
+	print" ".
+	
+	
+	print"Falcon Is In Flight.".
+	print" ".
+	
+	print ("Altitude: " + round(altitude) + " m").
+	print" ".
+	
+	print ("Apoapsis: " + round(apoapsis) + " m").
+	print" ".
+	
+	print ("Target Angle: " + round(S1FlightAngle) + " deg").
+	print" ".
+	
+	print ("Ascent Burn Fuel Remaining: " +  round(MainTankFuelPercent) + " %").
+	print" ".
+	
+	print"Vehicle Events: ".
+	print" ".
+	
+	print"- Hold Down Release.".
+	print" ".
+	
+	if altitude > TowerHeight
+	{
+		print"- Falcon Has Cleared The Tower.".
+		print" ".
+	}
+	
+	if altitude > 420 
+	{
+		print"- Roll Program Started.".
+		print" ".
+		print"- Pitch Program Started.".
+		print" ".
+		
+		if var2 = 0
+		{
+			sas off.
+			lock steering to heading(90,S1FlightAngle). //steering tradeoff
+			set var2 to 1.
+			
+			
+			toggle ag14.
+			toggle ag15.
+			toggle ag16.
+			toggle ag17.
+			toggle ag20.
+			wait 0.5.
+			toggle ag14.
+			toggle ag15.
+			toggle ag16.
+			toggle ag17.
+			toggle ag20.
+		}
+		
+	}
+	
+	if verticalspeed >330
+	{
+		print"- Falcon has reached Max Q".
+		print" ".
+	}
+	
+	if altitude > S1AltVar 
+	{
+		set S1AltVar to (S1AltVar + S1TurnFactor).
+		set S1FlightAngle to (S1FlightAngle - 1).
+
+	}
+	
+	if apoapsis > (TargetApoapsis-2500)
+	{
+		set MECOFactor to 1.
+	}
+	
+	wait 0.01.
+	clearscreen.
+}
+clearscreen.
+
+
+//Staging-------------------------------------------------------------*****
+
+
+set stagingTime to time.
+
+toggle ag1.
+
+until stagingFactor = 1
+{
+
+	print"=================================================".
+	print"------------ Crew Dragon - Demo 2 ---------------".
+	print"=================================================".
+	print" ".
+	
+	
+	print"Falcon Is In Flight.".
+	print" ".
+	
+	print ("Altitude: " + round(altitude) + " m").
+	print" ".
+	
+	print ("Apoapsis: " + round(apoapsis) + " m").
+	print" ".
+	
+	print ("Target Angle: " + round(S1FlightAngle) + " deg").
+	print" ".
+	
+	print"Vehicle Events: ".
+	print" ".
+	
+	print"- First Stage Engine Cutoff.".
+	print" ".
+	
+	if time > (stagingTime+1)
+	{
+		print"- Stage Seperation.".
+		print" ".
+		
+		if var3 = 0
+		{
+			toggle ag6.//First Stage Decouple
+			
+			set var3 to 1.
+			lock throttle to 1.
+			rcs on.
+			
+		}
+	}
+	
+	if time > (stagingTime + 7)
+	{
+		print"- Second Stage Engine Ignition.".
+		print" ".
+		
+		if var4 = 0
+		{	
+			set var1 to 0.1.
+			lock throttle to var1.
+			toggle ag5.
+			rcs off.
+			
+			
+			until var1 >0.99
+			{
+				set var1 to var1+0.01.
+				wait 0.01.
+			}
+		lock throttle to 1.
+
+		set var4 to 1.
+		}
+	}
+	
+	if var4 = 1 
+	{
+		set stagingFactor to 1. 
+	}
+	
+	
+	
+	
+	wait 0.01.
+	clearscreen.
+	
+}
+clearscreen.
+	
+	
+//Second Stage Flight---------------------------------------------------------*****
+
+
+
+lock S2Throttle to (1.5 * ship:mass * (ship:body:mu / ship:body:position:mag^2))/ ship:availablethrust.
+lock S2Thrust to S2Throttle*ship:availablethrust.
+lock throttle to S2Throttle.
+
+lock Fg to (ship:body:mu * ship:mass)  / (ship:position - body:position):mag^2.
+lock Fc to (ship:mass * (ship:groundspeed^2)) / (ship:position - body:position):mag.
+lock targetAngle to (arcsin((Fg - Fc) / S2Thrust))-ssTurnFactor.
+
+until inOrbit = 1
+{
+	print"=================================================".
+	print"------------ Crew Dragon - Demo 2 ---------------".
+	print"=================================================".
+	print" ".
+	
+	
+	print"Falcon Is In Flight.".
+	print" ".
+	
+	print ("Altitude: " + round(altitude) + " m").
+	print" ".
+	
+	print ("Apoapsis: " + round(apoapsis) + " m").
+	print" ".
+	
+	print ("Periapsis: " + round(periapsis) + " m").
+	print" ".
+	
+	print ("Time to Apoapsis: " + round(eta:apoapsis) + " s").
+	print" ".
+	
+	print ("Vertical Speed: " + round(verticalspeed) + " m/s").
+	print" ".
+	
+	print"Vehicle Events: ".
+	print" ".
+	
+	print"- MerlinVac Ignition.".
+	print" ".
+	
+	
+	
+	
+	if phase = 1
+	{
+		if apoapsis>TargetApoapsis
+		{
+			set phase to 2.
+		}
+		
+		print"- Raising Apoapsis.".
+		print" ".
+		
+	}
+	
+	if altitude > 70000
+	{
+		print"- Dragon Has Reached Space.".
+		print" ".
+	}
+	
+	if phase = 2
+	{
+		if verticalspeed < 3
+		{
+			set phase to 3.
+			lock steering to heading(90,targetAngle).
+			set TargetPeriapsis to altitude -500.
+		}
+		
+		set S1FlightAngle to 0.	
+		print"- Burning For Orbit.".
+	}
+	
+	if phase = 3
+	{
+		if periapsis > TargetPeriapsis
+		{
+			set inOrbit to 1.
+			toggle ag5.
+			lock throttle to 0.
+			lock steering to heading(90,0).
+		}
+		
+		print"- Burning For Orbit.".
+		print" ".
+		
+		print"- Maintaining Altitude.".
+		print" ".
+	
+	
+	}
+	
+	
+	
+	wait 0.01.
+	clearscreen.
+
+}
+
+
+
+//Orbital Operations---------------------------------------------*****
+
+set OrbitEntryTime to time.
+
+until var5 = 1
+{
+	print"=================================================".
+	print"------------ Crew Dragon - Demo 2 ---------------".
+	print"=================================================".
+	print" ".
+	
+	print"Dragon Is In Orbit.".
+	print" ".
+	
+	print ("Altitude: " + round(altitude) + " m").
+	print" ".
+	
+	print ("Apoapsis: " + round(apoapsis) + " m").
+	print" ".
+	
+	print ("Periapsis: " + round(periapsis) + " m").
+	print" ".
+	
+	print "Orientation: Prograde" .
+	print" ".
+	
+	print"Vehicle Events: ".
+	print" ".
+	
+	
+	if ((time > (OrbitEntryTime+3)) and dragonStaged = 0)
+	{
+		set dragonStaged to 1.
+		rcs on.
+		toggle ag9.// Dragon Seperation
+	}
+	
+	
+	if dragonStaged = 1
+	{
+		print"- Dragon Seperation Confirmed".
+		print" ".
+	}
+	
+	if dragonThrusting = 1
+	{
+		print"- Draco Thrusters Firing.".
+		
+	}
+	
+	if dragonThrusting = 3
+	{
+		print"- Docking Shroud Extended.".
+		print" ".
+		print"- Cabin Lights On.".
+
+		
+	}
+	
+	if ((time > (OrbitEntryTime+8)) and dragonThrusting = 0)
+	{
+		set dragonThrusting to 1.
+		
+		set ship:control:fore to 1.
+	}
+	
+	
+	
+	if ((time > (OrbitEntryTime+12)) and dragonThrusting = 1)
+	{
+		set ship:control:fore to 0.
+		set dragonThrusting to 2.
+		wait 2.
+		
+		set steeringmanager:maxstoppingtime to 0.1.
+		LOCK STEERING TO LOOKDIRUP(SHIP:VELOCITY:ORBIT, -UP:VECTOR).
+	}
+	
+	if ((time > (OrbitEntryTime+24)) and dragonThrusting = 2)
+	{
+		toggle ag13.
+		toggle lights.
+		set dragonThrusting to 3.
+	}
+	
+	
+
+
+	wait 0.2.
+	clearscreen.
+}
+	
+
+
